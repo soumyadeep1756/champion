@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Champions League T20</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            color: #ffffff;
+            min-height: 100vh;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+        .hide { display: none !important; }
+    </style>
+</head>
+<body class="pb-10">
+
+    <!-- Welcome Banner -->
+    <div id="welcomeBanner" class="w-full bg-blue-600/80 text-white text-center py-2 px-4 flex justify-between items-center glass">
+        <span class="text-sm md:text-base font-semibold mx-auto">Welcome to Champions League T20 site.</span>
+        <button onclick="document.getElementById('welcomeBanner').classList.add('hide')" class="text-white hover:text-gray-300">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="w-full p-4 glass sticky top-0 z-50 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-yellow-400 to-yellow-600 flex items-center justify-center shadow-lg">
+                <i class="fas fa-trophy text-slate-900 text-xl"></i>
+            </div>
+            <h1 class="text-lg md:text-xl font-bold tracking-wider">CHAMPIONS LEAGUE</h1>
+        </div>
+        <div>
+            <button id="loginBtn" onclick="handleLogin()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-colors">
+                <i class="fas fa-lock mr-2"></i>Admin
+            </button>
+            <button id="logoutBtn" onclick="handleLogout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-colors hide">
+                <i class="fas fa-sign-out-alt mr-2"></i>Logout
+            </button>
+        </div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto mt-6 px-4">
+        
+        <!-- Tabs -->
+        <div class="flex gap-4 mb-6">
+            <button onclick="switchTab('standings')" id="tab-standings" class="flex-1 py-3 glass rounded-xl font-bold text-center bg-blue-600/30 border-blue-400 transition-all">
+                <i class="fas fa-list-ol mr-2"></i> Standings
+            </button>
+            <button onclick="clearFilter(); switchTab('matches')" id="tab-matches" class="flex-1 py-3 glass rounded-xl font-bold text-center hover:bg-white/10 transition-all">
+                <i class="fas fa-bolt mr-2"></i> All Matches
+            </button>
+        </div>
+
+        <!-- Standings View -->
+        <div id="view-standings" class="glass rounded-2xl p-4 md:p-6 overflow-x-auto">
+            <p class="text-xs text-gray-400 text-center mb-4"><i class="fas fa-info-circle"></i> Tap a team's name to see their matches</p>
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-white/20 text-gray-300 text-sm">
+                        <th class="p-2 md:p-3">Rank</th>
+                        <th class="p-2 md:p-3">Team</th>
+                        <th class="p-2 md:p-3 text-center">P</th>
+                        <th class="p-2 md:p-3 text-center">W</th>
+                        <th class="p-2 md:p-3 text-center">L</th>
+                        <th class="p-2 md:p-3 text-center font-bold text-white">Pts</th>
+                        <th class="p-2 md:p-3 text-center">NRR</th>
+                    </tr>
+                </thead>
+                <tbody id="standingsBody">
+                    <!-- Populated by JS -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Matches View -->
+        <div id="view-matches" class="hide space-y-6">
+            
+            <!-- Admin Match Entry (Hidden to public) -->
+            <div id="adminPanel" class="glass rounded-2xl p-6 hide border-t-4 border-blue-500">
+                <h3 class="text-xl font-bold mb-4"><i class="fas fa-plus-circle mr-2"></i>Add New Match</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="number" id="mNum" placeholder="Match Number" class="bg-black/50 border border-white/20 rounded p-2 text-white">
+                    <input type="text" id="winTeam" placeholder="Winning Team Name" class="bg-black/50 border border-white/20 rounded p-2 text-white">
+                    
+                    <div class="p-3 border border-white/10 rounded-lg">
+                        <label class="text-sm text-gray-400 mb-2 block">Team 1 Details</label>
+                        <select id="t1" class="w-full bg-black/50 border border-white/20 rounded p-2 text-white mb-2">
+                            <option value="CSK">CSK</option>
+                            <option value="KKR">KKR</option>
+                            <option value="KARACHI KINGS">KARACHI KINGS</option>
+                            <option value="PAARL ROYALS">PAARL ROYALS</option>
+                            <option value="MELBOURNE STARS">MELBOURNE STARS</option>
+                            <option value="PERTH SCORCHERS">PERTH SCORCHERS</option>
+                            <option value="SYDNEY SIXERS">SYDNEY SIXERS</option>
+                            <option value="RCB">RCB</option>
+                        </select>
+                        <div class="flex gap-2">
+                            <input type="number" id="t1R" placeholder="Runs" class="w-1/3 bg-black/50 rounded p-2">
+                            <input type="number" id="t1W" placeholder="Wkts" class="w-1/3 bg-black/50 rounded p-2">
+                            <input type="number" step="0.1" id="t1O" placeholder="Ovs" class="w-1/3 bg-black/50 rounded p-2">
+                        </div>
+                    </div>
+
+                    <div class="p-3 border border-white/10 rounded-lg">
+                        <label class="text-sm text-gray-400 mb-2 block">Team 2 Details</label>
+                        <select id="t2" class="w-full bg-black/50 border border-white/20 rounded p-2 text-white mb-2">
+                            <option value="KARACHI KINGS">KARACHI KINGS</option>
+                            <option value="CSK">CSK</option>
+                            <option value="KKR">KKR</option>
+                            <option value="PAARL ROYALS">PAARL ROYALS</option>
+                            <option value="MELBOURNE STARS">MELBOURNE STARS</option>
+                            <option value="PERTH SCORCHERS">PERTH SCORCHERS</option>
+                            <option value="SYDNEY SIXERS">SYDNEY SIXERS</option>
+                            <option value="RCB">RCB</option>
+                        </select>
+                        <div class="flex gap-2">
+                            <input type="number" id="t2R" placeholder="Runs" class="w-1/3 bg-black/50 rounded p-2">
+                            <input type="number" id="t2W" placeholder="Wkts" class="w-1/3 bg-black/50 rounded p-2">
+                            <input type="number" step="0.1" id="t2O" placeholder="Ovs" class="w-1/3 bg-black/50 rounded p-2">
+                        </div>
+                    </div>
+                </div>
+                <button onclick="addMatch()" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-xl font-bold transition-all">Submit Match</button>
+            </div>
+
+            <!-- Team Filter Banner -->
+            <div id="filterBanner" class="hide bg-yellow-500/20 border border-yellow-500/50 rounded-xl p-3 flex justify-between items-center">
+                <span id="filterText" class="font-bold text-yellow-400 text-sm md:text-base"></span>
+                <button onclick="clearFilter()" class="bg-gray-800 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm transition-colors border border-gray-600">Show All</button>
+            </div>
+
+            <!-- Match History Container -->
+            <div id="matchesContainer" class="space-y-4">
+                <!-- Matches injected here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data Configuration (Direct Wikipedia PNGs)
+        const logos = {
+            "CSK": "https://upload.wikimedia.org/wikipedia/en/thumb/2/2b/Chennai_Super_Kings_Logo.svg/300px-Chennai_Super_Kings_Logo.svg.png",
+            "KKR": "https://upload.wikimedia.org/wikipedia/en/thumb/4/4c/Kolkata_Knight_Riders_Logo.svg/300px-Kolkata_Knight_Riders_Logo.svg.png",
+            "KARACHI KINGS": "https://upload.wikimedia.org/wikipedia/en/thumb/b/b5/Karachi_Kings_Logo.svg/300px-Karachi_Kings_Logo.svg.png",
+            "PAARL ROYALS": "https://upload.wikimedia.org/wikipedia/en/thumb/2/2a/Paarl_Royals_logo.svg/300px-Paarl_Royals_logo.svg.png",
+            "MELBOURNE STARS": "https://upload.wikimedia.org/wikipedia/en/thumb/5/52/Melbourne_Stars_logo.svg/300px-Melbourne_Stars_logo.svg.png",
+            "PERTH SCORCHERS": "https://upload.wikimedia.org/wikipedia/en/thumb/4/43/Perth_Scorchers_Logo.svg/300px-Perth_Scorchers_Logo.svg.png",
+            "SYDNEY SIXERS": "https://upload.wikimedia.org/wikipedia/en/thumb/9/91/Sydney_Sixers_Logo.svg/300px-Sydney_Sixers_Logo.svg.png",
+            "RCB": "https://upload.wikimedia.org/wikipedia/en/thumb/2/2a/Royal_Challengers_Bangalore_2020.svg/300px-Royal_Challengers_Bangalore_2020.svg.png"
+        };
+
+        // Seed matches
+        let matches = [
+            { id: 9, t1: "SYDNEY SIXERS", t1R: 174, t1W: 10, t1O: 20, t2: "CSK", t2R: 106, t2W: 10, t2O: 20, win: "SYDNEY SIXERS" },
+            { id: 7, t1: "MELBOURNE STARS", t1R: 310, t1W: 9, t1O: 20, t2: "RCB", t2R: 221, t2W: 10, t2O: 20, win: "MELBOURNE STARS" },
+            { id: 6, t1: "KKR", t1R: 125, t1W: 4, t1O: 6.5, t2: "PAARL ROYALS", t2R: 119, t2W: 10, t2O: 20, win: "KKR" },
+            { id: 5, t1: "SYDNEY SIXERS", t1R: 216, t1W: 10, t1O: 20, t2: "KARACHI KINGS", t2R: 217, t2W: 4, t2O: 14.3, win: "KARACHI KINGS" },
+            { id: 4, t1: "PERTH SCORCHERS", t1R: 290, t1W: 10, t1O: 20, t2: "PAARL ROYALS", t2R: 222, t2W: 10, t2O: 20, win: "PERTH SCORCHERS" },
+            { id: 3, t1: "KARACHI KINGS", t1R: 310, t1W: 8, t1O: 20, t2: "KKR", t2R: 245, t2W: 10, t2O: 20, win: "KARACHI KINGS" },
+            { id: 2, t1: "PAARL ROYALS", t1R: 205, t1W: 8, t1O: 20, t2: "MELBOURNE STARS", t2R: 213, t2W: 8, t2O: 20, win: "MELBOURNE STARS" },
+            { id: 1, t1: "CSK", t1R: 185, t1W: 10, t1O: 20, t2: "KARACHI KINGS", t2R: 186, t2W: 6, t2O: 13, win: "KARACHI KINGS" }
+        ];
+
+        let isAdmin = false;
+        let currentTeamFilter = null;
+
+        // UI & Tab Logic
+        function switchTab(tab) {
+            document.getElementById('view-standings').classList.add('hide');
+            document.getElementById('view-matches').classList.add('hide');
+            document.getElementById(`view-${tab}`).classList.remove('hide');
+            
+            document.getElementById('tab-standings').classList.remove('bg-blue-600/30', 'border-blue-400');
+            document.getElementById('tab-matches').classList.remove('bg-blue-600/30', 'border-blue-400');
+            document.getElementById(`tab-${tab}`).classList.add('bg-blue-600/30', 'border-blue-400');
+        }
+
+        function filterMatches(team) {
+            currentTeamFilter = team;
+            switchTab('matches');
+            renderMatches();
+        }
+
+        function clearFilter() {
+            currentTeamFilter = null;
+            renderMatches();
+        }
+
+        // Authentication Logic
+        function handleLogin() {
+            const pass = prompt("Enter Admin Password:");
+            if(pass === "raxx1756") { 
+                isAdmin = true;
+                document.getElementById('loginBtn').classList.add('hide');
+                document.getElementById('logoutBtn').classList.remove('hide');
+                document.getElementById('adminPanel').classList.remove('hide');
+                renderMatches();
+            } else if(pass !== null) {
+                alert("Incorrect Password");
+            }
+        }
+
+        function handleLogout() {
+            isAdmin = false;
+            document.getElementById('logoutBtn').classList.add('hide');
+            document.getElementById('loginBtn').classList.remove('hide');
+            document.getElementById('adminPanel').classList.add('hide');
+            renderMatches();
+        }
+
+        // NRR & Math Logic
+        function getBalls(overs) {
+            let fullOvers = Math.floor(overs);
+            let extraBalls = Math.round((overs - fullOvers) * 10);
+            return (fullOvers * 6) + extraBalls;
+        }
+
+        function getMathematicalOvers(overs, wickets) {
+            if (wickets >= 10) return 20.0;
+            let balls = getBalls(overs);
+            return balls / 6.0;
+        }
+
+        function calculateStandings() {
+            let stats = {};
+            Object.keys(logos).forEach(team => {
+                stats[team] = { p:0, w:0, l:0, pts:0, runScored:0, overFaced:0, runConceded:0, overBowled:0 };
+            });
+
+            matches.forEach(m => {
+                stats[m.t1].p++;
+                stats[m.t1].runScored += m.t1R;
+                stats[m.t1].overFaced += getMathematicalOvers(m.t1O, m.t1W);
+                stats[m.t1].runConceded += m.t2R;
+                stats[m.t1].overBowled += getMathematicalOvers(m.t2O, m.t2W);
+                
+                stats[m.t2].p++;
+                stats[m.t2].runScored += m.t2R;
+                stats[m.t2].overFaced += getMathematicalOvers(m.t2O, m.t2W);
+                stats[m.t2].runConceded += m.t1R;
+                stats[m.t2].overBowled += getMathematicalOvers(m.t1O, m.t1W);
+
+                if (m.win === m.t1) { stats[m.t1].w++; stats[m.t1].pts += 2; stats[m.t2].l++; }
+                else if (m.win === m.t2) { stats[m.t2].w++; stats[m.t2].pts += 2; stats[m.t1].l++; }
+            });
+
+            let standingsArray = Object.keys(stats).map(team => {
+                let s = stats[team];
+                let nrr = (s.p > 0) ? ((s.runScored / s.overFaced) - (s.runConceded / s.overBowled)) : 0;
+                return { team, ...s, nrr };
+            });
+
+            standingsArray.sort((a, b) => b.pts - a.pts || b.nrr - a.nrr);
+            renderStandings(standingsArray);
+        }
+
+        function renderStandings(data) {
+            const tbody = document.getElementById('standingsBody');
+            tbody.innerHTML = '';
+            
+            data.forEach((row, index) => {
+                let nrrDisplay = (row.nrr > 0 ? "+" : "") + row.nrr.toFixed(3);
+                if (row.p === 0) nrrDisplay = "0.000";
+
+                let tr = document.createElement('tr');
+                tr.className = "border-b border-white/10 hover:bg-white/5 transition-colors";
+                tr.innerHTML = `
+                    <td class="p-2 md:p-3 font-bold">${index + 1}</td>
+                    <td class="p-2 md:p-3 flex items-center gap-3 cursor-pointer group" onclick="filterMatches('${row.team}')" title="View ${row.team} matches">
+                        <img src="${logos[row.team]}" class="w-8 h-8 md:w-10 md:h-10 object-contain bg-white rounded-full p-1 transition-transform group-hover:scale-110">
+                        <span class="font-semibold text-sm md:text-base group-hover:text-yellow-400 transition-colors">${row.team}</span>
+                    </td>
+                    <td class="p-2 md:p-3 text-center">${row.p}</td>
+                    <td class="p-2 md:p-3 text-center text-green-400">${row.w}</td>
+                    <td class="p-2 md:p-3 text-center text-red-400">${row.l}</td>
+                    <td class="p-2 md:p-3 text-center font-bold text-lg text-blue-400">${row.pts}</td>
+                    <td class="p-2 md:p-3 text-center font-mono ${row.nrr >= 0 ? 'text-green-300' : 'text-red-300'}">${nrrDisplay}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderMatches() {
+            const container = document.getElementById('matchesContainer');
+            container.innerHTML = '';
+            
+            let sortedMatches = [...matches].sort((a, b) => b.id - a.id);
+
+            // Apply filter if one is active
+            if (currentTeamFilter) {
+                sortedMatches = sortedMatches.filter(m => m.t1 === currentTeamFilter || m.t2 === currentTeamFilter);
+                document.getElementById('filterBanner').classList.remove('hide');
+                document.getElementById('filterText').innerHTML = `<i class="fas fa-filter mr-2"></i>Showing matches for: <b>${currentTeamFilter}</b>`;
+            } else {
+                document.getElementById('filterBanner').classList.add('hide');
+            }
+
+            sortedMatches.forEach(m => {
+                let div = document.createElement('div');
+                div.className = "glass rounded-2xl p-4 md:p-6 relative";
+                
+                let deleteBtn = isAdmin ? `<button onclick="deleteMatch(${m.id})" class="absolute top-4 right-4 text-red-500 hover:text-red-400 transition-colors"><i class="fas fa-trash-alt"></i></button>` : '';
+
+                div.innerHTML = `
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="bg-blue-900/50 text-blue-300 px-3 py-1 rounded-full text-xs font-bold border border-blue-500/30">MATCH ${m.id}</span>
+                        <span class="bg-green-900/50 text-green-300 px-3 py-1 rounded-full text-xs font-bold border border-green-500/30">${m.win} WON</span>
+                        ${deleteBtn}
+                    </div>
+                    <div class="flex justify-between items-center relative">
+                        <div class="text-center w-5/12 cursor-pointer hover:opacity-80" onclick="filterMatches('${m.t1}')">
+                            <img src="${logos[m.t1]}" class="w-12 h-12 md:w-16 md:h-16 mx-auto mb-2 bg-white rounded-full p-1 object-contain">
+                            <h4 class="font-bold text-sm md:text-base">${m.t1}</h4>
+                            <p class="text-lg md:text-xl font-bold mt-2">${m.t1R}/${m.t1W}</p>
+                            <p class="text-xs text-gray-400">(${m.t1O} ov)</p>
+                        </div>
+                        
+                        <div class="w-2/12 text-center">
+                            <span class="text-gray-500 font-bold text-sm">VS</span>
+                        </div>
+
+                        <div class="text-center w-5/12 cursor-pointer hover:opacity-80" onclick="filterMatches('${m.t2}')">
+                            <img src="${logos[m.t2]}" class="w-12 h-12 md:w-16 md:h-16 mx-auto mb-2 bg-white rounded-full p-1 object-contain">
+                            <h4 class="font-bold text-sm md:text-base">${m.t2}</h4>
+                            <p class="text-lg md:text-xl font-bold mt-2">${m.t2R}/${m.t2W}</p>
+                            <p class="text-xs text-gray-400">(${m.t2O} ov)</p>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // Admin CRUD Actions
+        function addMatch() {
+            let m = {
+                id: parseInt(document.getElementById('mNum').value),
+                t1: document.getElementById('t1').value,
+                t1R: parseInt(document.getElementById('t1R').value),
+                t1W: parseInt(document.getElementById('t1W')
